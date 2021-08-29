@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/avocadohooman/react_graphql_postgres_typescript-boilerplate#readme",
   "devDependencies": {
+    "@types/express": "^4.17.13",
     "@types/node": "^16.7.5",
     "nodemon": "^2.0.12",
     "ts-node": "^10.2.1",
@@ -32,7 +33,11 @@
     "@mikro-orm/core": "^4.5.9",
     "@mikro-orm/migrations": "^4.5.9",
     "@mikro-orm/postgresql": "^4.5.9",
-    "pg": "^8.7.1"
+    "apollo-server-express": "^3.3.0",
+    "express": "^4.17.1",
+    "graphql": "^15.5.1",
+    "pg": "^8.7.1",
+    "type-graphql": "^1.1.1"
   },
   "mikro-orm": {
     "useTsNode": true,
