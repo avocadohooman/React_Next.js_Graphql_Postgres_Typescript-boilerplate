@@ -21,9 +21,9 @@ const main = async () => {
         }),
         context: () => ({ em: orm.em })
     });
-    
+
     await apolloServer.start();
-    apolloServer.applyMiddleware({app});
+    apolloServer.applyMiddleware({ app });
 
     app.listen(PORT, () => {
         console.log(`Server running on port: ${PORT}`);
