@@ -46,20 +46,24 @@ export class UserResolver {
             }
         }
         const hashedPassword = await argon2.hash(password);
-        const checkIfExist = await em.findOne(User, {username: username.toLocaleLowerCase()});
-        if (checkIfExist) {
-            return {
-                errors: [{
-                    field: 'username',
-                    message: `username already exists`,
-                }]
-            };
-        }
         const user = em.create(User, {
             username: username, 
             password: hashedPassword
         });
-        await em.persistAndFlush(user);
+        try {
+            await em.persistAndFlush(user);
+        } catch (error) {
+            // duplicate user rrro
+            if (error.code === '23505' || error.detail.includes('already exists')) {
+                return {
+                    errors: [{
+                        field: 'username',
+                        message: 'user already exists'
+                    }]
+                };
+            }
+            return error.message;
+        }
         return {
             user,
         };
