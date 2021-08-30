@@ -11,6 +11,9 @@ import redis from 'redis';
 import session from 'express-session';
 import connectRedis from 'connect-redis';
 import dotenv from 'dotenv';
+import { MyContext } from "./Types/types";
+
+const corsOption = { origin: "https://studio.apollographql.com", credentials: true, }
 
 const main = async () => {
     const orm = await MikroORM.init(mikroConfig);
@@ -24,7 +27,8 @@ const main = async () => {
     const redisClient = redis.createClient();
 
     dotenv.config();
-    // redis connect config from official documentation
+
+    // setting up express-session config from official documentation
     app.use(
         session({
             name: 'qid',
@@ -37,10 +41,10 @@ const main = async () => {
                 maxAge: 1000 * 60 * 60 * 24 * 365* 10, // 10 years
                 httpOnly: true,
                 sameSite: 'lax', // csrf token
-                secure: false // set to prod when ready
+                secure: __prod__ // set to prod when ready
             },
             saveUninitialized: false,
-            secret: process.env.REDIS_SECRET as string,
+            secret: 'dklajd;aj2ljlmd.asmkdal',
             resave: false,
         })
     )
@@ -50,11 +54,11 @@ const main = async () => {
             resolvers: [HelloResolver, PostResolver, UserResolver],
             validate: false,
         }),
-        context: ( req: Request, res: Response ) => ({ em: orm.em, req, res })
+        context: ({req, res}) => ({ em: orm.em, req, res })
     });
 
     await apolloServer.start();
-    apolloServer.applyMiddleware({ app });
+    apolloServer.applyMiddleware({ app, cors: corsOption});
 
     app.listen(PORT, () => {
         console.log(`Server running on port: ${PORT}`);

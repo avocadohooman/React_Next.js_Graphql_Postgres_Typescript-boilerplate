@@ -27,7 +27,7 @@ export class UserResolver {
     async register(
         @Arg('username') username: string,
         @Arg('password') password: string,
-        @Ctx() {em}: MyContext
+        @Ctx() {em, req}: MyContext
     ) : Promise<UserResponse> {
         if (username.length <= 2) {
             return {
@@ -64,6 +64,7 @@ export class UserResolver {
             }
             return error.message;
         }
+        req.session.userId = user.id;
         return {
             user,
         };
@@ -94,8 +95,8 @@ async login(
         };
     }
 
-    req.session.id = user.id.toString();
-
+    //sets session cookie with userid
+    req.session.userId = user.id;
     return {
         user,
     };

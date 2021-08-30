@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/avocadohooman/react_graphql_postgres_typescript-boilerplate#readme",
   "devDependencies": {
-    "@types/connect-redis": "^0.0.17",
+    "@types/connect-redis": "0.0.14",
     "@types/express": "^4.17.13",
     "@types/express-session": "^1.17.4",
     "@types/node": "^16.7.5",
