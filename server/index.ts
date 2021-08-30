@@ -11,7 +11,6 @@ import redis from 'redis';
 import session from 'express-session';
 import connectRedis from 'connect-redis';
 import dotenv from 'dotenv';
-import { MyContext } from "./Types/types";
 
 const corsOption = { origin: "https://studio.apollographql.com", credentials: true, }
 
