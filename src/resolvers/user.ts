@@ -69,32 +69,35 @@ export class UserResolver {
         };
     }
 
-    @Mutation(() => UserResponse)
-    async login(
-        @Arg('username') username: string,
-        @Arg('password') password: string,
-        @Ctx() {em}: MyContext
-    ) : Promise<UserResponse> {
-        const user = await em.findOne(User, {username: username.toLocaleLowerCase()});
-        if (!user) {
-            return {
-                errors: [{
-                    field: 'username',
-                    message: `username or password incorrect`,
-                }]
-            };
-        }
-        const valid = await argon2.verify(user.password, password);
-        if (!valid) {
-            return {
-                errors: [{
-                    field: 'password',
-                    message: 'username or password incorrect',
-                }]
-            };
-        }
+@Mutation(() => UserResponse)
+async login(
+    @Arg('username') username: string,
+    @Arg('password') password: string,
+    @Ctx() {em, req}: MyContext
+) : Promise<UserResponse> {
+    const user = await em.findOne(User, {username: username.toLocaleLowerCase()});
+    if (!user) {
         return {
-            user,
+            errors: [{
+                field: 'username',
+                message: `username or password incorrect`,
+            }]
         };
     }
+    const valid = await argon2.verify(user.password, password);
+    if (!valid) {
+        return {
+            errors: [{
+                field: 'password',
+                message: 'username or password incorrect',
+            }]
+        };
+    }
+
+    req.session.id = user.id.toString();
+
+    return {
+        user,
+    };
+}
 }
