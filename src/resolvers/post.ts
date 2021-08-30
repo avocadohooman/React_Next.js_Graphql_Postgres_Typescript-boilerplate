@@ -41,7 +41,7 @@ export class PostResolver {
         }
         return post;
     }
-    @Mutation(() => Post, {nullable: true})
+    @Mutation(() => Boolean)
     async deletePost(
         @Arg('id') id: number,
         @Ctx() ctx: MyContext
