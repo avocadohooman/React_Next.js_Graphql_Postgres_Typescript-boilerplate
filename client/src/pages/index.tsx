@@ -1,4 +1,3 @@
-
 const Index = () => (
   <div>Hello world</div>
 )
