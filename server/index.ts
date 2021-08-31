@@ -11,6 +11,7 @@ import redis from 'redis';
 import session from 'express-session';
 import connectRedis from 'connect-redis';
 import dotenv from 'dotenv';
+import cors from 'cors';
 
 const corsOption = { origin: "https://studio.apollographql.com", credentials: true, }
 
@@ -46,7 +47,9 @@ const main = async () => {
             secret: 'dklajd;aj2ljlmd.asmkdal',
             resave: false,
         })
-    )
+    );
+
+    // app.use(cors);
 
     const apolloServer = new ApolloServer({
         schema: await buildSchema({
@@ -57,7 +60,7 @@ const main = async () => {
     });
 
     await apolloServer.start();
-    apolloServer.applyMiddleware({ app, cors: corsOption});
+    apolloServer.applyMiddleware({ app });
 
     app.listen(PORT, () => {
         console.log(`Server running on port: ${PORT}`);

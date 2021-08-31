@@ -11,6 +11,7 @@ import {
 } from "@chakra-ui/react";
 import Wrapper from '../components/Wrapper';
 import InputField from '../components/InputField';
+import { useMutation } from 'urql';
 
 interface registerProps {
 
@@ -21,7 +22,24 @@ const initialValues = {
     password: '',
 };
 
+const REGISTER_MUT = `
+    mutation Register($username: String!, $password: String!) {
+        register(password: $password, username: $username) {
+        errors {
+            field
+            message
+        }
+        user {
+            id
+            username
+        }
+        }
+    }
+`
+
 const Register: React.FC<registerProps> = ({}) => {
+
+        const [result, register] = useMutation(REGISTER_MUT);
 
         return (
             <Wrapper variant='small'>
@@ -29,6 +47,7 @@ const Register: React.FC<registerProps> = ({}) => {
                 initialValues={{username: '', password: ''}}
                 onSubmit={(values) => {
                     console.log(values);
+                    register(values);
                 }}
                 > 
                 {({isSubmitting}) => (
