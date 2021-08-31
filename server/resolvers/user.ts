@@ -2,6 +2,7 @@ import { User } from "../entities/User";
 import { MyContext } from "server/Types/types";
 import { Arg, Ctx, Field, Mutation, ObjectType, Query, Resolver } from "type-graphql";
 import argon2 from 'argon2';
+import { EntityManager } from "@mikro-orm/postgresql";
 
 @ObjectType()
 class FieldError {
@@ -46,12 +47,17 @@ export class UserResolver {
             }
         }
         const hashedPassword = await argon2.hash(password);
-        const user = em.create(User, {
-            username: username, 
-            password: hashedPassword
-        });
+        let user;
         try {
-            await em.persistAndFlush(user);
+            const result= await (em as EntityManager).createQueryBuilder(User).getKnexQuery().insert(
+                {
+                    username: username, 
+                    password: hashedPassword,
+                    created_at: new Date(),
+                    updated_at: new Date()
+                }
+            ).returning("*");
+            user = result[0];
         } catch (error) {
             // duplicate user rrro
             if (error.code === '23505' || error.detail.includes('already exists')) {
