@@ -105,6 +105,13 @@ async login(
     req.session.userId = user.id;
     return {
         user,
-    };
 }
+};
+@Query(() => User, {nullable: true})
+    me(@Ctx() {em, req }: MyContext) {
+        if (!req.session.userId) {
+            return null;
+        }
+        return em.findOne(User, {id: req.session.userId});
+    }
 }
