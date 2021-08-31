@@ -3,6 +3,7 @@ import { MyContext } from "server/Types/types";
 import { Arg, Ctx, Field, Mutation, ObjectType, Query, Resolver } from "type-graphql";
 import argon2 from 'argon2';
 import { EntityManager } from "@mikro-orm/postgresql";
+import { COOKIE_NAME } from "../constants";
 
 @ObjectType()
 class FieldError {
@@ -76,42 +77,61 @@ export class UserResolver {
         };
     }
 
-@Mutation(() => UserResponse)
-async login(
-    @Arg('username') username: string,
-    @Arg('password') password: string,
-    @Ctx() {em, req}: MyContext
-) : Promise<UserResponse> {
-    const user = await em.findOne(User, {username: username.toLocaleLowerCase()});
-    if (!user) {
-        return {
-            errors: [{
-                field: 'username',
-                message: `username or password incorrect`,
-            }]
-        };
-    }
-    const valid = await argon2.verify(user.password, password);
-    if (!valid) {
-        return {
-            errors: [{
-                field: 'password',
-                message: 'username or password incorrect',
-            }]
-        };
-    }
-
-    //sets session cookie with userid
-    req.session.userId = user.id;
-    return {
-        user,
-}
-};
-@Query(() => User, {nullable: true})
-    me(@Ctx() {em, req }: MyContext) {
-        if (!req.session.userId) {
-            return null;
+    @Mutation(() => UserResponse)
+    async login(
+        @Arg('username') username: string,
+        @Arg('password') password: string,
+        @Ctx() {em, req}: MyContext
+    ) : Promise<UserResponse> {
+        const user = await em.findOne(User, {username: username.toLocaleLowerCase()});
+        if (!user) {
+            return {
+                errors: [{
+                    field: 'username',
+                    message: `username or password incorrect`,
+                }]
+            };
         }
-        return em.findOne(User, {id: req.session.userId});
+        const valid = await argon2.verify(user.password, password);
+        if (!valid) {
+            return {
+                errors: [{
+                    field: 'password',
+                    message: 'username or password incorrect',
+                }]
+            };
+        }
+
+        //sets session cookie with userid
+        req.session.userId = user.id;
+        return {
+            user,
     }
+    };
+
+    @Mutation(() => Boolean)
+        logout(
+            @Ctx() {req, res} : MyContext
+        ) {
+            //req session destroys redis session/cookie
+            return new Promise(resolve => req.session.destroy(err => {
+                res.clearCookie(COOKIE_NAME);
+                if (err) {
+                    console.log(err);
+                    resolve(false);
+                    return ;
+                } else {
+                    // destroys client side cookie
+                    resolve(true);
+                }
+            }))
+        };
+
+    @Query(() => User, {nullable: true})
+        me(@Ctx() {em, req }: MyContext) {
+            if (!req.session.userId) {
+                return null;
+            }
+            return em.findOne(User, {id: req.session.userId});
+    };
 }

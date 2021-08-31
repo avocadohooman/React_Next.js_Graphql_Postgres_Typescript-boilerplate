@@ -1,5 +1,5 @@
 import { MikroORM } from "@mikro-orm/core";
-import { __prod__, PORT } from "./constants";
+import { __prod__, PORT, COOKIE_NAME } from "./constants";
 import mikroConfig from './mikro-orm.config';
 import express from 'express';
 import { ApolloServer } from 'apollo-server-express';
@@ -33,7 +33,7 @@ const main = async () => {
     // setting up express-session config from official documentation
     app.use(
         session({
-            name: 'qid',
+            name: COOKIE_NAME,
             store: new RedisStore({ 
                 client: redisClient,
                 disableTouch: true,
