@@ -13,7 +13,7 @@ import connectRedis from 'connect-redis';
 import dotenv from 'dotenv';
 import cors from 'cors';
 
-const corsOption = { origin: "https://studio.apollographql.com", credentials: true, }
+const corsOption = { origin: "http://localhost:3000", credentials: true, }
 
 const main = async () => {
     const orm = await MikroORM.init(mikroConfig);
@@ -27,6 +27,8 @@ const main = async () => {
     const redisClient = redis.createClient();
 
     dotenv.config();
+
+    app.use(cors(corsOption));
 
     // setting up express-session config from official documentation
     app.use(
@@ -49,7 +51,6 @@ const main = async () => {
         })
     );
 
-    // app.use(cors);
 
     const apolloServer = new ApolloServer({
         schema: await buildSchema({
@@ -60,7 +61,7 @@ const main = async () => {
     });
 
     await apolloServer.start();
-    apolloServer.applyMiddleware({ app });
+    apolloServer.applyMiddleware({ app, cors: false });
 
     app.listen(PORT, () => {
         console.log(`Server running on port: ${PORT}`);
