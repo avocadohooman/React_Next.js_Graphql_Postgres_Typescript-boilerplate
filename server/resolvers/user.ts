@@ -40,9 +40,49 @@ export class UserResolver {
         const token = v4();
         await redis.set(FORGET_PASSWORD_PREFLIX + token, user.id, 'ex', 1000 * 60 * 60 * 24); // one day
     
-        const resetPage = `<a href="http://localhost:3000/change-password/${token}">click here</a>`
+        const resetPage = `<a href="http://localhost:3000/changePassword/${token}">click here</a>`
         await sendEmail(email, resetPage)
         return true;
+    }
+
+    @Mutation(() => UserResponse)
+    async changePassword(
+        @Arg('password') password: string,
+        @Arg('token') token: string,
+        @Ctx() {em, redis} : MyContext
+    ): Promise<UserResponse> {
+        if (password.length <= 2) {
+            return {
+                errors: [{
+                    field: 'password',
+                    message: 'password length must be greater than 2'
+                }]
+            }
+        }
+        const userId = await redis.get(FORGET_PASSWORD_PREFLIX + token);
+        if (!userId) {
+            return {
+                errors: [{
+                    field: 'token',
+                    message: 'token expired'
+                }]
+            }
+        }
+
+        const user = await em.findOne(User, {id: parseInt(userId)});
+        if (!user) {
+            return {
+                errors: [{
+                    field: 'token',
+                    message: 'user no longer exists'
+                }]
+            }
+        }
+        const hashedPassword = await argon2.hash(password);
+        user.password = hashedPassword;
+        await em.persistAndFlush(user);
+
+        return {user};
     }
 
     @Mutation(() => UserResponse)

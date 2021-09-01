@@ -30,7 +30,7 @@ const main = async () => {
 
     dotenv.config();
 
-    // app.use(cors(corsOption));
+    app.use(cors(corsOption));
 
     // setting up express-session config from official documentation
     app.use(
@@ -63,8 +63,8 @@ const main = async () => {
     });
 
     await apolloServer.start();
-    apolloServer.applyMiddleware({ app, cors: {origin: 'https://studio.apollographql.com', credentials: true }});
-    // apolloServer.applyMiddleware({ app, cors: false});
+    // apolloServer.applyMiddleware({ app, cors: {origin: 'https://studio.apollographql.com', credentials: true }});
+    apolloServer.applyMiddleware({ app, cors: false});
 
     app.listen(PORT, () => {
         console.log(`Server running on port: ${PORT}`);
