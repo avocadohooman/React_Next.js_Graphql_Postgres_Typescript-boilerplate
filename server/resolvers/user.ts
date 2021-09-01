@@ -25,9 +25,19 @@ class UserResponse {
 
 @Resolver()
 export class UserResolver {
+    @Mutation(() => Boolean)
+    async forgotPassword(
+        @Arg('email') email: string,
+        @Ctx() {em} : MyContext
+    ) {
+        const user = await em.findOne(User, {email})
+        return true;
+    }
+
     @Mutation(() => UserResponse)
     async register(
         @Arg('username') username: string,
+        @Arg('email') email: string,
         @Arg('password') password: string,
         @Ctx() {em, req}: MyContext
     ) : Promise<UserResponse> {
@@ -36,6 +46,14 @@ export class UserResolver {
                 errors: [{
                     field: 'username',
                     message: 'username length must be greater than 2'
+                }]
+            }
+        }
+        if (!email) {
+            return {
+                errors: [{
+                    field: 'email',
+                    message: 'email can\'t be empty'
                 }]
             }
         }
@@ -54,6 +72,7 @@ export class UserResolver {
                 {
                     username: username, 
                     password: hashedPassword,
+                    email: email,
                     created_at: new Date(),
                     updated_at: new Date()
                 }

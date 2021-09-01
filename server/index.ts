@@ -13,6 +13,7 @@ import connectRedis from 'connect-redis';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import { sendEmail } from "./utils/sendEmail";
+import { User } from "./entities/User";
 
 const corsOption = { origin: "http://localhost:3000", credentials: true, }
 
