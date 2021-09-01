@@ -2,11 +2,11 @@ import { User } from "../entities/User";
 import { MyContext } from "server/Types/types";
 import { Arg, Ctx, Field, Mutation, ObjectType, Query, Resolver } from "type-graphql";
 import argon2 from 'argon2';
-import { EntityManager } from "@mikro-orm/postgresql";
 import { COOKIE_NAME, FORGET_PASSWORD_PREFLIX } from "../constants";
 import { validateRegister } from "../utils/validateRegister";
 import { sendEmail } from "../utils/sendEmail";
 import { v4 } from "uuid";
+import {getConnection} from 'typeorm';
 
 @ObjectType()
 class FieldError {
@@ -31,9 +31,10 @@ export class UserResolver {
     @Mutation(() => Boolean)
     async forgotPassword(
         @Arg('email') email: string,
-        @Ctx() {em, redis} : MyContext
+        @Ctx() {redis} : MyContext
     ) {
-        const user = await em.findOne(User, {email})
+        //if you search for values that are not the primary key (e.g. id), then you need to use {where: <variable>}
+        const user = await User.findOne({where: email});
         if (!user) {
             return true;
         }
@@ -49,7 +50,7 @@ export class UserResolver {
     async changePassword(
         @Arg('password') password: string,
         @Arg('token') token: string,
-        @Ctx() {em, redis} : MyContext
+        @Ctx() {redis} : MyContext
     ): Promise<UserResponse> {
         if (password.length <= 2) {
             return {
@@ -69,7 +70,8 @@ export class UserResolver {
             }
         }
 
-        const user = await em.findOne(User, {id: parseInt(userId)});
+        const userIdNum = parseInt(userId);
+        const user = await User.findOne(userIdNum);
         if (!user) {
             return {
                 errors: [{
@@ -80,8 +82,8 @@ export class UserResolver {
         }
         const hashedPassword = await argon2.hash(password);
         user.password = hashedPassword;
-        await em.persistAndFlush(user);
-        await redis.del(FORGET_PASSWORD_PREFLIX + token);
+        await User.update(userIdNum, {password: hashedPassword});
+        await redis.del(FORGET_PASSWORD_PREFLIX + token)
         return {user};
     }
 
@@ -90,25 +92,27 @@ export class UserResolver {
         @Arg('username') username: string,
         @Arg('email') email: string,
         @Arg('password') password: string,
-        @Ctx() {em, req}: MyContext
+        @Ctx() {req}: MyContext
     ) : Promise<UserResponse> {
         const validationError = validateRegister(username, email, password);
         if (validationError) {
             return validationError;
         }
         const hashedPassword = await argon2.hash(password);
-        let user;
+        let user; 
         try {
-            const result = await (em as EntityManager).createQueryBuilder(User).getKnexQuery().insert(
-                {
-                    username: username, 
-                    email: email,
-                    password: hashedPassword,
-                    created_at: new Date(),
-                    updated_at: new Date()
-                }
-            ).returning("*");
-            user = result[0];
+            const result = await getConnection()
+                    .createQueryBuilder()
+                    .insert()
+                    .into(User)
+                    .values({
+                        username: username, 
+                        email: email,
+                        password: hashedPassword,
+                    })
+                    .returning('*')
+                    .execute(); 
+            user = result.raw[0];
         } catch (error) {
             // duplicate user rrro
             if (error.code === '23505' || error.detail.includes('already exists')) {
@@ -131,11 +135,13 @@ export class UserResolver {
     async login(
         @Arg('usernameOrEmail') usernameOrEmail: string,
         @Arg('password') password: string,
-        @Ctx() {em, req}: MyContext
+        @Ctx() { req}: MyContext
     ) : Promise<UserResponse> {
-        const user = await em.findOne(User, usernameOrEmail.includes('@') 
-                                            ? {email: usernameOrEmail.toLocaleLowerCase()}
-                                            : {username: usernameOrEmail.toLocaleLowerCase()});
+        const user = await User.findOne(
+            usernameOrEmail.includes('@') 
+            ? {where: {email: usernameOrEmail.toLocaleLowerCase()}}
+            : {where: {username: usernameOrEmail.toLocaleLowerCase()}}
+        );
         if (!user) {
             return {
                 errors: [{
@@ -176,14 +182,14 @@ export class UserResolver {
                     // destroys client side cookie
                     resolve(true);
                 }
-            }))
+            })) 
         };
 
     @Query(() => User, {nullable: true})
-        me(@Ctx() {em, req }: MyContext) {
+        me(@Ctx() { req }: MyContext) {
             if (!req.session.userId) {
                 return null;
             }
-            return em.findOne(User, {id: req.session.userId});
+            return User.findOne(req.session.userId);
     };
 }
