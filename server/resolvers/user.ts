@@ -49,7 +49,7 @@ export class UserResolver {
         const hashedPassword = await argon2.hash(password);
         let user;
         try {
-            const result= await (em as EntityManager).createQueryBuilder(User).getKnexQuery().insert(
+            const result = await (em as EntityManager).createQueryBuilder(User).getKnexQuery().insert(
                 {
                     username: username, 
                     email: email,

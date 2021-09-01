@@ -1,5 +1,5 @@
-mutation Login($username: String!, $password: String!) {
-    login(password: $password, username: $username) {
+mutation Login($usernameOrEmail: String!, $password: String!) {
+    login(password: $password, usernameOrEmail: $usernameOrEmail) {
     errors {
         field
         message
