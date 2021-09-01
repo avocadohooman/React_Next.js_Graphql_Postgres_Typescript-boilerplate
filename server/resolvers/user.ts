@@ -3,8 +3,10 @@ import { MyContext } from "server/Types/types";
 import { Arg, Ctx, Field, Mutation, ObjectType, Query, Resolver } from "type-graphql";
 import argon2 from 'argon2';
 import { EntityManager } from "@mikro-orm/postgresql";
-import { COOKIE_NAME } from "../constants";
+import { COOKIE_NAME, FORGET_PASSWORD_PREFLIX } from "../constants";
 import { validateRegister } from "../utils/validateRegister";
+import { sendEmail } from "../utils/sendEmail";
+import { v4 } from "uuid";
 
 @ObjectType()
 class FieldError {
@@ -29,9 +31,17 @@ export class UserResolver {
     @Mutation(() => Boolean)
     async forgotPassword(
         @Arg('email') email: string,
-        @Ctx() {em} : MyContext
+        @Ctx() {em, redis} : MyContext
     ) {
         const user = await em.findOne(User, {email})
+        if (!user) {
+            return true;
+        }
+        const token = v4();
+        await redis.set(FORGET_PASSWORD_PREFLIX + token, user.id, 'ex', 1000 * 60 * 60 * 24); // one day
+    
+        const resetPage = `<a href="http://localhost:3000/change-password/${token}">click here</a>`
+        await sendEmail(email, resetPage)
         return true;
     }
 
@@ -89,7 +99,7 @@ export class UserResolver {
         if (!user) {
             return {
                 errors: [{
-                    field: 'username',
+                    field: 'usernameOrEmail',
                     message: `username or password incorrect`,
                 }]
             };
