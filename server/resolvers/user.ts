@@ -4,6 +4,7 @@ import { Arg, Ctx, Field, Mutation, ObjectType, Query, Resolver } from "type-gra
 import argon2 from 'argon2';
 import { EntityManager } from "@mikro-orm/postgresql";
 import { COOKIE_NAME } from "../constants";
+import { validateRegister } from "../utils/validateRegister";
 
 @ObjectType()
 class FieldError {
@@ -41,29 +42,9 @@ export class UserResolver {
         @Arg('password') password: string,
         @Ctx() {em, req}: MyContext
     ) : Promise<UserResponse> {
-        if (username.length <= 2) {
-            return {
-                errors: [{
-                    field: 'username',
-                    message: 'username length must be greater than 2'
-                }]
-            }
-        }
-        if (!email) {
-            return {
-                errors: [{
-                    field: 'email',
-                    message: 'email can\'t be empty'
-                }]
-            }
-        }
-        if (password.length <= 2) {
-            return {
-                errors: [{
-                    field: 'password',
-                    message: 'password length must be greater than 2'
-                }]
-            }
+        const validationError = validateRegister(username, email, password);
+        if (validationError) {
+            return validationError;
         }
         const hashedPassword = await argon2.hash(password);
         let user;
@@ -71,8 +52,8 @@ export class UserResolver {
             const result= await (em as EntityManager).createQueryBuilder(User).getKnexQuery().insert(
                 {
                     username: username, 
-                    password: hashedPassword,
                     email: email,
+                    password: hashedPassword,
                     created_at: new Date(),
                     updated_at: new Date()
                 }
@@ -98,11 +79,13 @@ export class UserResolver {
 
     @Mutation(() => UserResponse)
     async login(
-        @Arg('username') username: string,
+        @Arg('usernameOrEmail') usernameOrEmail: string,
         @Arg('password') password: string,
         @Ctx() {em, req}: MyContext
     ) : Promise<UserResponse> {
-        const user = await em.findOne(User, {username: username.toLocaleLowerCase()});
+        const user = await em.findOne(User, usernameOrEmail.includes('@') 
+                                            ? {email: usernameOrEmail.toLocaleLowerCase()}
+                                            : {username: usernameOrEmail.toLocaleLowerCase()});
         if (!user) {
             return {
                 errors: [{
