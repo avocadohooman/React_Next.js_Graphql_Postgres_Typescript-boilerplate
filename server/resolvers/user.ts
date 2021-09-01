@@ -81,7 +81,7 @@ export class UserResolver {
         const hashedPassword = await argon2.hash(password);
         user.password = hashedPassword;
         await em.persistAndFlush(user);
-
+        await redis.del(FORGET_PASSWORD_PREFLIX + token);
         return {user};
     }
 
