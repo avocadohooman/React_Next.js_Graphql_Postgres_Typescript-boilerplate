@@ -12,12 +12,13 @@ import session from 'express-session';
 import connectRedis from 'connect-redis';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import { sendEmail } from "./utils/sendEmail";
 
 const corsOption = { origin: "http://localhost:3000", credentials: true, }
 
 const main = async () => {
+    
     const orm = await MikroORM.init(mikroConfig);
-
     // runs migrator after table has been initialised
     await orm.getMigrator().up();
 
