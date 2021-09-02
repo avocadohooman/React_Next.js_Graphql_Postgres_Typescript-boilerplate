@@ -1,6 +1,17 @@
 import { Post } from "../entities/Post";
-import { Arg, Mutation, Query, Resolver } from "type-graphql";
-import { MyContext } from "../Types/types";
+import { Arg, Ctx, Field, InputType, Mutation, Query, Resolver, UseMiddleware } from "type-graphql";
+import { MyContext } from "server/Types/types";
+import { isAuth } from "../middleware/isAuth";
+
+@InputType()
+class PostInput {
+    @Field()
+    title: string;
+    @Field()
+    text: string;
+    @Field()
+    points: number;
+}
 
 @Resolver()
 export class PostResolver {
@@ -17,11 +28,17 @@ export class PostResolver {
     }
     @Mutation(() => Post)
     async createPost(
-        @Arg('title') title: string,
+        @Arg('input') input: PostInput,
+        @Ctx() { req }:MyContext
         ) : Promise<Post> {
-        return Post.create({title}).save();
+
+        return Post.create({
+            ...input,
+            creatorId: req.session.userId 
+        }).save();
     }
     @Mutation(() => Post, {nullable: true})
+    @UseMiddleware(isAuth)
     async updatePost(
         @Arg('id') id: number,
         //when wanting to make an argument optional, set it as nullable: true
