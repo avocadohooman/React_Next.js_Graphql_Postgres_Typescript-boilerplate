@@ -7,8 +7,10 @@ import {
   Link,
   Button, Stack, Box,
   Heading,
-  Text
+  Text,
+  Flex
 } from "@chakra-ui/react";
+import React from 'react';
 const Index = () => {
 
   const [result, post] = usePostsQuery({
@@ -20,22 +22,31 @@ const Index = () => {
 
   return (
     <Layout>
-      <NextLink href='createPost'>
-        <Link>
-          <Button>
-            Create Post
-          </Button>
-        </Link>
-      </NextLink>
+      <Flex justifyContent='space-between' mb={4}>
+        <Heading>LiReddit</Heading>
+        <NextLink href='createPost'>
+          <Link>
+            <Button>
+              Create Post
+            </Button>
+          </Link>
+        </NextLink>
+      </Flex>
       <Stack spacing={8}>
-        {!result.data ? null : result.data.posts.map(post => 
+        {result.fetching && !result.data ? (<div>loading</div>) : (
+          result.data?.posts.map(post => 
             <Box p={5} key={post.id} shadow="md" borderWidth="1px">
               <Heading fontSize="xl">{post.title}</Heading>
-              <Text mt={4}>{post.text}</Text>
+              <Text mt={4}>{post.textSnippet}</Text>
             </Box>
+          )
         )} 
-
       </Stack>
+      <Flex justifyContent='center' mt={4} mb={10}>
+        <Button>
+            Load More
+        </Button>
+      </Flex>
     </Layout>
   )
 }
