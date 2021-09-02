@@ -2,18 +2,20 @@ import { Box } from '@chakra-ui/layout';
 import { Button } from '@chakra-ui/react';
 import { Formik, Form } from 'formik';
 import { useRouter } from 'next/router';
-import React from 'react'
+import React, { useEffect } from 'react'
 import InputField from '../components/InputField';
 import Wrapper from '../components/Wrapper';
-import { useCreatePostMutation } from '../generated/graphql';
+import { useCreatePostMutation, useMeQuery } from '../generated/graphql';
 import { withUrqlClient } from 'next-urql';
 import { createUrqlClient } from "../utils/createUrqlClient";
 import Layout from '../components/Layout';
+import { useIsAuth } from '../utils/useIsAuth';
 
 
 const CreatePost: React.FC<{}> = ({}) => {
-    const router = useRouter();
     const [result, createPost] = useCreatePostMutation();
+    const router = useRouter();
+    useIsAuth();
 
     return (
         <Layout variant='small'>
@@ -26,9 +28,13 @@ const CreatePost: React.FC<{}> = ({}) => {
                 // } else if (response.data?.login.user) {
                 //     router.push('/');
                 // }   
-                console.log(values);
-                await createPost({input: values})
-                router.push('/');
+                const {error} = await createPost({input: values})
+                if (error?.message.includes('not')) {
+                    router.replace('/login'); // resets route, instead of adding a new instance to router history
+                }
+                if (!error) {
+                    router.push('/');
+                }
             }}
             > 
             {({isSubmitting}) => (
