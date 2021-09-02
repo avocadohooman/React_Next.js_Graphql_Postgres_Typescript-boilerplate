@@ -10,7 +10,7 @@ class PostInput {
     @Field()
     text: string;
     @Field()
-    points: number;
+    points?: number;
 }
 
 @Resolver()
@@ -27,6 +27,7 @@ export class PostResolver {
         return Post.findOne(id)
     }
     @Mutation(() => Post)
+    @UseMiddleware(isAuth)
     async createPost(
         @Arg('input') input: PostInput,
         @Ctx() { req }:MyContext

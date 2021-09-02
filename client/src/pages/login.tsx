@@ -43,9 +43,9 @@ const login: React.FC<loginProps> = ({}) => {
             > 
             {({isSubmitting}) => (
                 <Form>
-                    <InputField name='usernameOrEmail' placeholder='Username or Email' label='Username or Email'/>
+                    <InputField textarea={false} name='usernameOrEmail' placeholder='Username or Email' label='Username or Email'/>
                     <Box mt={4}>
-                        <InputField name='password' placeholder='Password' label='Password' type='password'/>
+                        <InputField textarea={false} name='password' placeholder='Password' label='Password' type='password'/>
                     </Box>
                     <Box>
                         <NextLink href="/forgotPassword">
