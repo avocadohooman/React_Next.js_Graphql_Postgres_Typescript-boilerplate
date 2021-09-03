@@ -10,16 +10,15 @@ import {
   Text,
   Flex
 } from "@chakra-ui/react";
-import React from 'react';
+import React, { useState } from 'react';
 const Index = () => {
 
-  const [result, post] = usePostsQuery({
-    variables: {
-      limit: 10
-    }
-    
-  });
+  const [variables, setVairables] = useState({limit: 10, cursor: null as null | string | undefined})
+  const [result, post] = usePostsQuery({variables});
 
+  if (!result.fetching && !result.data) {
+    return <div> No posts available.</div>
+  }
   return (
     <Layout>
       <Flex justifyContent='space-between' mb={4}>
@@ -34,7 +33,7 @@ const Index = () => {
       </Flex>
       <Stack spacing={8}>
         {result.fetching && !result.data ? (<div>loading</div>) : (
-          result.data?.posts.map(post => 
+          result.data!.posts.map(post => 
             <Box p={5} key={post.id} shadow="md" borderWidth="1px">
               <Heading fontSize="xl">{post.title}</Heading>
               <Text mt={4}>{post.textSnippet}</Text>
@@ -42,11 +41,18 @@ const Index = () => {
           )
         )} 
       </Stack>
-      <Flex justifyContent='center' mt={4} mb={10}>
-        <Button>
-            Load More
-        </Button>
-      </Flex>
+      {result.data ? (
+              <Flex justifyContent='center' mt={4} mb={10}>
+              <Button onClick={() => {
+                setVairables({
+                  limit: variables.limit , 
+                  cursor: result.data?.posts[result.data?.posts.length - 1].createdAt
+                })
+              }}isLoading={result.fetching}>
+                  Load More
+              </Button>
+            </Flex>
+      ) : null }
     </Layout>
   )
 }
