@@ -6,7 +6,11 @@ query Posts($cursor: String, $limit: Int!) {
       id
       createdAt
       textSnippet
+      author {
+        id
+        username
+        email
+      }
     }
-
   }
 }
