@@ -33,7 +33,7 @@ const Index = () => {
       </Flex>
       <Stack spacing={8}>
         {result.fetching && !result.data ? (<div>loading</div>) : (
-          result.data!.posts.map(post => 
+          result.data!.posts.posts.map(post => 
             <Box p={5} key={post.id} shadow="md" borderWidth="1px">
               <Heading fontSize="xl">{post.title}</Heading>
               <Text mt={4}>{post.textSnippet}</Text>
@@ -41,12 +41,12 @@ const Index = () => {
           )
         )} 
       </Stack>
-      {result.data ? (
+      {result.data && result.data.posts.hasMore ? (
               <Flex justifyContent='center' mt={4} mb={10}>
               <Button onClick={() => {
                 setVairables({
                   limit: variables.limit , 
-                  cursor: result.data?.posts[result.data?.posts.length - 1].createdAt
+                  cursor: result.data?.posts.posts[result.data?.posts.posts.length - 1].createdAt
                 })
               }}isLoading={result.fetching}>
                   Load More

@@ -9,6 +9,9 @@ export const createUrqlClient = (ssrExchange: any) => ({
       credentials: 'include' as const,
     },
     exchanges: [dedupExchange, cacheExchange({
+      keys: {
+        PaginatedPosts: () => null,
+      },
       resolvers: {
         Query: {
           posts: cursorPagination(),
@@ -56,73 +59,30 @@ export const cursorPagination = (): Resolver => {
     const allFields = cache.inspectFields(entityKey);
     const fieldInfos = allFields.filter(info => info.fieldName === fieldName);
     const size = fieldInfos.length;
-    console.log('all Field', allFields);
     if (size === 0) {
       return undefined;
     }
 
     const fieldKey = `${fieldName}(${stringifyVariables(fieldArgs)})`;
-    const isItInTheCache = cache.resolveFieldByKey(entityKey, fieldKey);
-    console.log('fieldKey', fieldKey);
+    const isItInTheCache = cache.resolve(cache.resolveFieldByKey(entityKey, fieldKey) as string, 'posts');
     info.partial = !isItInTheCache;
-    console.log('isItInTheCache', isItInTheCache);
+    
     let result: string[] = [];
+    let hasMore: boolean = true;
+
     fieldInfos.forEach((fi) => {
-      const data = cache.resolveFieldByKey(entityKey, fi.fieldKey) as string[];
-      result.push(...data);
-    })
-    return result;
+      const key = cache.resolveFieldByKey(entityKey, fi.fieldKey) as string;
+      const posts = cache.resolve(key, 'posts') as string[];
+      const _hasMore = cache.resolve(key, 'hasMore');
+      if (!_hasMore) {
+        hasMore = _hasMore as boolean
+      }
+      result.push(...posts);
+    });
 
-  //   const visited = new Set();
-  //   let result: NullArray<string> = [];
-  //   let prevOffset: number | null = null;
-
-  //   for (let i = 0; i < size; i++) {
-  //     const { fieldKey, arguments: args } = fieldInfos[i];
-  //     if (args === null || !compareArgs(fieldArgs, args)) {
-  //       continue;
-  //     }
-
-  //     const links = cache.resolve(entityKey, fieldKey) as string[];
-  //     const currentOffset = args[offsetArgument];
-
-  //     if (
-  //       links === null ||
-  //       links.length === 0 ||
-  //       typeof currentOffset !== 'number'
-  //     ) {
-  //       continue;
-  //     }
-
-  //     const tempResult: NullArray<string> = [];
-
-  //     for (let j = 0; j < links.length; j++) {
-  //       const link = links[j];
-  //       if (visited.has(link)) continue;
-  //       tempResult.push(link);
-  //       visited.add(link);
-  //     }
-
-  //     if (
-  //       (!prevOffset || currentOffset > prevOffset) ===
-  //       (mergeMode === 'after')
-  //     ) {
-  //       result = [...result, ...tempResult];
-  //     } else {
-  //       result = [...tempResult, ...result];
-  //     }
-
-  //     prevOffset = currentOffset;
-  //   }
-
-  //   const hasCurrentPage = cache.resolve(entityKey, fieldName, fieldArgs);
-  //   if (hasCurrentPage) {
-  //     return result;
-  //   } else if (!(info as any).store.schema) {
-  //     return undefined;
-  //   } else {
-  //     info.partial = true;
-  //     return result;
-  //   }
-  // };
+    return {
+      __typename: 'PaginatedPosts',
+      hasMore,
+      posts: result
+    };
 }}
