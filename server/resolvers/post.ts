@@ -3,7 +3,7 @@ import { Arg, Ctx, Field, FieldResolver, InputType, Int, Mutation, ObjectType, Q
 import { MyContext } from "server/Types/types";
 import { isAuth } from "../middleware/isAuth";
 import { getConnection } from "typeorm";
-import { Updoot } from "server/entities/Updoot";
+import { Updoot } from "..//entities/Updoot";
 
 @InputType()
 class PostInput {
@@ -42,11 +42,21 @@ export class PostResolver {
         const isUpdoot = value !== -1;
         const realValue = isUpdoot ? 1 : -1
         const { userId } = req.session;
-        await Updoot.insert({
-            userId,
-            postId,
-            value: realValue
-        })
+
+        // using START TRANSACTION + COMMIT, allows a joint sequel. This ensures that if one of those fail, all fail
+        await getConnection().query(`
+            START TRANSACTION;
+
+            INERT INTO updoot ("userId", "postId", value)
+            values(${userId}, ${postId}, ${realValue});
+
+            UPDATE post
+            SET points = points + ${realValue}
+            WHERE id = ${postId};
+
+            COMMIT;
+        `);
+
         return true;
     }
 
