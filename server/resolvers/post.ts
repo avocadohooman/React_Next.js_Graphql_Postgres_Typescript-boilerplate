@@ -3,6 +3,7 @@ import { Arg, Ctx, Field, FieldResolver, InputType, Int, Mutation, ObjectType, Q
 import { MyContext } from "server/Types/types";
 import { isAuth } from "../middleware/isAuth";
 import { getConnection } from "typeorm";
+import { Updoot } from "server/entities/Updoot";
 
 @InputType()
 class PostInput {
@@ -22,11 +23,31 @@ class PaginatedPosts {
     hasMore: boolean
 }
 
+// If using FieldResolvers you need to pass in the the type, e.g. Post
 @Resolver(Post)
 export class PostResolver {
+    // For sclice body of text in the backend instead of client-side
     @FieldResolver(() => String)
     textSnippet(@Root() root: Post) {
         return root.text.slice(0, 100)
+    }
+
+    @Mutation(() => Boolean)
+    @UseMiddleware(isAuth)
+    async vote(
+        @Arg('postId', () => Int) postId: number,
+        @Arg('value', () => Int) value: number,
+        @Ctx() { req }: MyContext
+    ) {
+        const isUpdoot = value !== -1;
+        const realValue = isUpdoot ? 1 : -1
+        const { userId } = req.session;
+        await Updoot.insert({
+            userId,
+            postId,
+            value: realValue
+        })
+        return true;
     }
 
     @Query(() => PaginatedPosts)
@@ -43,23 +64,24 @@ export class PostResolver {
         if (cursor) {
             replacements.push(new Date(parseInt(cursor)));
         }
-
         const posts = await getConnection().query(`
             SELECT p.*, 
-            u.username
             json_build_object(
                 'username', u.username,
                 'id', u.id,
-                'email', u.email,
-                ) creator
+                'email', u.email
+                ) author
             FROM post p
             INNER JOIN public.user u on u.id = p."creatorId"
             ${cursor ? `WHERE p."createdAt" < $2` : ""}
             ORDER BY p."createdAt" DESC
             limit $1
         `, replacements);
-        
-        return {posts: posts.slice(0, realLimit), hasMore: posts.length === realLimitPlusOne};
+
+        return {
+            posts: posts.slice(0, realLimit), 
+            hasMore: posts.length === realLimitPlusOne
+        };
     }
     @Query(() => Post, {nullable: true})
     post(

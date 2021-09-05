@@ -15,6 +15,7 @@ import { createConnection } from 'typeorm';
 import { User } from "./entities/User";
 import { Post } from "./entities/Post";
 import path from 'path';
+import { Updoot } from "./entities/Updoot";
 
 const corsOption = { origin: "http://localhost:3000", credentials: true, }
 
@@ -27,7 +28,7 @@ const main = async () => {
         logging: true,
         synchronize: true,
         migrations: [path.join(__dirname, "./migrations/*")],
-        entities: [User, Post],
+        entities: [User, Post, Updoot],
     });
 
     // await Post.delete({});

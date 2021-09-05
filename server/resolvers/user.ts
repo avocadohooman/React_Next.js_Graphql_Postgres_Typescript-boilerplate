@@ -1,6 +1,6 @@
 import { User } from "../entities/User";
 import { MyContext } from "server/Types/types";
-import { Arg, Ctx, Field, Mutation, ObjectType, Query, Resolver } from "type-graphql";
+import { Arg, Ctx, Field, FieldResolver, Mutation, ObjectType, Query, Resolver, Root } from "type-graphql";
 import argon2 from 'argon2';
 import { COOKIE_NAME, FORGET_PASSWORD_PREFLIX } from "../constants";
 import { validateRegister } from "../utils/validateRegister";
@@ -26,8 +26,20 @@ class UserResponse {
     user?: User;
 }
 
-@Resolver()
+// If using FieldResolvers you need to pass in the the type, e.g. User
+@Resolver(User)
 export class UserResolver {
+    // Adding an email FieldResolver to prevent showing emails of all user when fetching all posts
+    @FieldResolver(() => String)
+    email(@Root() user: User, @Ctx() {req}: MyContext) {
+        //this is the current user and it is ok to show the mail
+        if (req.session.userId === user.id) {
+            return user.email;
+        }
+        // current user wants to see someone elses email
+        return "";
+    }
+
     @Mutation(() => Boolean)
     async forgotPassword(
         @Arg('email') email: string,

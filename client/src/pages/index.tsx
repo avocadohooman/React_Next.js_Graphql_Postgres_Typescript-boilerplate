@@ -20,7 +20,6 @@ const Index = () => {
     return <div> No posts available.</div>
   }
 
-  console.log('result', result.data?.posts.posts);
   return (
     <Layout>
       <Flex justifyContent='space-between' mb={4}>
