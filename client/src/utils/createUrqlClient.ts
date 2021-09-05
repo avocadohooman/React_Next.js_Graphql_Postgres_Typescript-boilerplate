@@ -21,9 +21,12 @@ export const createUrqlClient = (ssrExchange: any) => ({
         Mutation: {
           createPost: (_result, args, cache, info) => {
             //here we invalidate the cache after creating a post, and fetch all posts again + populate the cache
-            cache.invalidate('Query', 'posts', {
-                  limit: 15
-              });
+            // pluse we invalidated also the paginated items, so all items are fetched freshly from the network
+            const allFields = cache.inspectFields('Query');
+            const fieldInfos = allFields.filter(info => info.fieldName === "posts");
+            fieldInfos.forEach((fi) => {
+              cache.invalidate('Query', 'posts', fi.arguments || {});
+            });
           },
           login: (result: LoginMutation, args, cache, info) => {
             cache.updateQuery({ query: MeDocument}, (data: MeQuery | null) => {
