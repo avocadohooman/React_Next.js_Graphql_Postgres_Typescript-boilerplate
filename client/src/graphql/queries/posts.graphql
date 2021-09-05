@@ -8,8 +8,7 @@ query Posts($cursor: String, $limit: Int!) {
       textSnippet
       author {
         id
-        username
-        email
+        username 
       }
     }
   }

@@ -13,7 +13,10 @@ import {
 import React, { useState } from 'react';
 const Index = () => {
 
-  const [variables, setVairables] = useState({limit: 10, cursor: null as null | string | undefined})
+  const [variables, setVairables] = useState({
+    limit: 15, 
+    cursor: null as null | string | undefined
+  });
   const [result, post] = usePostsQuery({variables});
 
   if (!result.fetching && !result.data) {
@@ -36,7 +39,10 @@ const Index = () => {
         {result.fetching && !result.data ? (<div>loading</div>) : (
           result.data!.posts.posts.map(post => 
             <Box p={5} key={post.id} shadow="md" borderWidth="1px">
-              <Heading fontSize="xl">{post.title}</Heading>
+              <Flex flexDirection="column">
+                <Heading fontSize="xl">{post.title}</Heading>
+                <Text>posted by {post.author.username}</Text>
+              </Flex>
               <Text mt={4}>{post.textSnippet}</Text>
             </Box>
           )

@@ -1,6 +1,6 @@
 import { dedupExchange, fetchExchange, stringifyVariables} from 'urql';
 import { cacheExchange, Resolver } from '@urql/exchange-graphcache';
-import { LoginMutation, LogoutMutation, MeDocument, MeQuery, RegisterMutation } from '../generated/graphql';
+import { CreatePostMutation, LoginMutation, LogoutMutation, MeDocument, MeQuery, PostsDocument, PostsQuery, RegisterMutation } from '../generated/graphql';
 import { stringify } from 'querystring';
 
 export const createUrqlClient = (ssrExchange: any) => ({
@@ -19,6 +19,12 @@ export const createUrqlClient = (ssrExchange: any) => ({
       },
       updates: {
         Mutation: {
+          createPost: (_result, args, cache, info) => {
+            //here we invalidate the cache after creating a post, and fetch all posts again + populate the cache
+            cache.invalidate('Query', 'posts', {
+                  limit: 15
+              });
+          },
           login: (result: LoginMutation, args, cache, info) => {
             cache.updateQuery({ query: MeDocument}, (data: MeQuery | null) => {
               if (result.login.errors) {
