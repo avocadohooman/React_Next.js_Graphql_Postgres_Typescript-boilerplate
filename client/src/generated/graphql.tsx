@@ -93,6 +93,7 @@ export type Post = {
   points: Scalars['Float'];
   creatorId: Scalars['Float'];
   author: User;
+  voteStatus?: Maybe<Scalars['Int']>;
   createdAt: Scalars['String'];
   updatedAt: Scalars['String'];
   textSnippet: Scalars['String'];
@@ -138,7 +139,7 @@ export type UserResponse = {
   user?: Maybe<User>;
 };
 
-export type PostSnippetFragment = { __typename?: 'Post', title: string, id: number, createdAt: string, textSnippet: string, points: number, author: { __typename?: 'User', id: number, username: string } };
+export type PostSnippetFragment = { __typename?: 'Post', title: string, id: number, createdAt: string, textSnippet: string, points: number, voteStatus?: Maybe<number>, author: { __typename?: 'User', id: number, username: string } };
 
 export type RegularUserFragment = { __typename?: 'User', id: number, username: string, email: string };
 
@@ -205,7 +206,7 @@ export type PostsQueryVariables = Exact<{
 }>;
 
 
-export type PostsQuery = { __typename?: 'Query', posts: { __typename?: 'PaginatedPosts', hasMore: boolean, posts: Array<{ __typename?: 'Post', title: string, id: number, createdAt: string, textSnippet: string, points: number, author: { __typename?: 'User', id: number, username: string } }> } };
+export type PostsQuery = { __typename?: 'Query', posts: { __typename?: 'PaginatedPosts', hasMore: boolean, posts: Array<{ __typename?: 'Post', title: string, id: number, createdAt: string, textSnippet: string, points: number, voteStatus?: Maybe<number>, author: { __typename?: 'User', id: number, username: string } }> } };
 
 export const PostSnippetFragmentDoc = gql`
     fragment PostSnippet on Post {
@@ -214,6 +215,7 @@ export const PostSnippetFragmentDoc = gql`
   createdAt
   textSnippet
   points
+  voteStatus
   author {
     id
     username

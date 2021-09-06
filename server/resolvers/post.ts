@@ -40,7 +40,7 @@ export class PostResolver {
         @Ctx() { req }: MyContext
     ) {
         const isUpdoot = value !== -1;
-        const realValue = isUpdoot ? 1 : -1
+        const realValue = isUpdoot ? 1 : -1;
         const { userId } = req.session;
 
         const updoot = await Updoot.findOne({ where: {postId, userId}});
@@ -88,12 +88,17 @@ export class PostResolver {
         // number will be converted to Float otherwise
         @Arg('limit', () => Int) limit: number,
         // make it nullable as first time we use it there won't be a cursor. when you set something nullable, you have to set a type
-        @Arg('cursor', () => String, {nullable: true}) cursor: string | null
+        @Arg('cursor', () => String, {nullable: true}) cursor: string | null,
+        @Ctx() { req }: MyContext
     ) : Promise<PaginatedPosts> {
         const realLimit = Math.min(50, limit);
         const realLimitPlusOne = realLimit + 1;
 
         const replacements: any[] = [realLimitPlusOne];
+        console.log("REG", req.session);
+        if (req.session.userId) {
+            replacements.push(req.session.userId);
+        }
         if (cursor) {
             replacements.push(new Date(parseInt(cursor)));
         }
@@ -103,10 +108,15 @@ export class PostResolver {
                 'username', u.username,
                 'id', u.id,
                 'email', u.email
-                ) author
+                ) author,
+            ${
+                req.session.userId 
+                ? '(select value from updoot where "userId" = $2 and "postId" = p.id) "voteStatus" '
+                : 'null as "voteStatus"'
+            }
             FROM post p
             INNER JOIN public.user u on u.id = p."creatorId"
-            ${cursor ? `WHERE p."createdAt" < $2` : ""}
+            ${cursor ? `WHERE p."createdAt" < $3` : ""}
             ORDER BY p."createdAt" DESC
             limit $1
         `, replacements);

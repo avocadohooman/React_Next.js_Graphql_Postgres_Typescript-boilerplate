@@ -13,13 +13,25 @@ const UpdootSection: React.FC<UpdootSectionProps> = ({post}) => {
 
     return (
         <Flex flexDirection="column" mr={4} alignItems="center">  
-            <ChevronUpIcon cursor="pointer" onClick={async () =>  {
+            <ChevronUpIcon 
+            cursor="pointer" 
+            color={post.voteStatus === 1 ? 'green' : undefined}
+            onClick={async () =>  {
+                if (post.voteStatus === 1) {
+                    return;
+                  }
                 setLoadingState('updoot-isloading');
                 await vote({value: 1, postId: post.id});
                 setLoadingState('not-loading');
             }} w={8} h={8}/>
                 {post.points}
-            <ChevronDownIcon cursor="pointer" onClick={async () => {
+            <ChevronDownIcon 
+            color={post.voteStatus === -1 ? 'red' : undefined}
+            cursor="pointer" 
+            onClick={async () => {
+                if (post.voteStatus === -1) {
+                    return;
+                  }
                 setLoadingState('downdoot-isloading');
                 await vote({value: -1, postId: post.id});
                 setLoadingState('not-loading');

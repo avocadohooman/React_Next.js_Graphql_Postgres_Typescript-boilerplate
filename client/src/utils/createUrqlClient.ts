@@ -3,11 +3,22 @@ import { cacheExchange, Resolver } from '@urql/exchange-graphcache';
 import { CreatePostMutation, LoginMutation, LogoutMutation, MeDocument, MeQuery, PostsDocument, PostsQuery, RegisterMutation, VoteMutation, VoteMutationVariables } from '../generated/graphql';
 import { stringify } from 'querystring';
 import { gql } from '@urql/core';
+import { isServer } from './isServer';
 
-export const createUrqlClient = (ssrExchange: any) => ({
+export const createUrqlClient = (ssrExchange: any, ctx: any) => {
+  let cookie = '';
+
+  if (isServer()) {
+    cookie = ctx.req.headers.cookie;
+  }
+
+  return {
     url: 'http://localhost:4000/graphql',
     fetchOptions: {
       credentials: 'include' as const,
+      headers: cookie ? {
+        cookie
+      } : undefined
     },
     exchanges: [dedupExchange, cacheExchange({
       keys: {
@@ -36,20 +47,25 @@ export const createUrqlClient = (ssrExchange: any) => ({
                 fragment _ on Post {
                   id
                   points
+                  voteStatus
                 }
               `,
               { id: postId }
             ); // Data or null
             console.log('data', data);
             if (data) { 
-                const newPointValue = data.points + value;
+              if (data.voteStatus === value) {
+                return ;
+              }
+                const newPointValue = data.points + (!data.voteStatus ? 1 : 2) * value;
                 cache.writeFragment(
                   gql`
                     fragment _ on Post {
                       points
+                      voteStatus
                     }
                   `,
-                  { id: postId, points: newPointValue }
+                  { id: postId, points: newPointValue, voteStatus: value }
                 );
             }
           },
@@ -84,7 +100,7 @@ export const createUrqlClient = (ssrExchange: any) => ({
         }
       }
     }), ssrExchange, fetchExchange], 
-});
+}};
 
 export const cursorPagination = (): Resolver => {
   return (_parent, fieldArgs, cache, info) => {
