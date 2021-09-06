@@ -76,7 +76,7 @@ export class PostResolver {
                     SET points = points + $1
                     WHERE id = $2;
                 `, [realValue, postId]);
-            })
+            });
         }
 
 

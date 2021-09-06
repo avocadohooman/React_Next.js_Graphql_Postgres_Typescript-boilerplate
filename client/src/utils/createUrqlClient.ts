@@ -1,7 +1,8 @@
 import { dedupExchange, fetchExchange, stringifyVariables} from 'urql';
 import { cacheExchange, Resolver } from '@urql/exchange-graphcache';
-import { CreatePostMutation, LoginMutation, LogoutMutation, MeDocument, MeQuery, PostsDocument, PostsQuery, RegisterMutation, VoteMutation } from '../generated/graphql';
+import { CreatePostMutation, LoginMutation, LogoutMutation, MeDocument, MeQuery, PostsDocument, PostsQuery, RegisterMutation, VoteMutation, VoteMutationVariables } from '../generated/graphql';
 import { stringify } from 'querystring';
+import { gql } from '@urql/core';
 
 export const createUrqlClient = (ssrExchange: any) => ({
     url: 'http://localhost:4000/graphql',
@@ -29,11 +30,28 @@ export const createUrqlClient = (ssrExchange: any) => ({
             });
           },
           vote: (result: VoteMutation, args, cache, info) => {
-            const allFields = cache.inspectFields('Query');
-            const fieldInfos = allFields.filter(info => info.fieldName === "posts");
-            fieldInfos.forEach((fi) => {
-              cache.invalidate('Query', 'posts', fi.arguments || {});
-            });
+            const { postId, value } = args as VoteMutationVariables;
+            const data = cache.readFragment(
+              gql`
+                fragment _ on Post {
+                  id
+                  points
+                }
+              `,
+              { id: postId }
+            ); // Data or null
+            console.log('data', data);
+            if (data) { 
+                const newPointValue = data.points + value;
+                cache.writeFragment(
+                  gql`
+                    fragment _ on Post {
+                      points
+                    }
+                  `,
+                  { id: postId, points: newPointValue }
+                );
+            }
           },
           login: (result: LoginMutation, args, cache, info) => {
             cache.updateQuery({ query: MeDocument}, (data: MeQuery | null) => {
@@ -44,6 +62,7 @@ export const createUrqlClient = (ssrExchange: any) => ({
                   me: result.login.user,
                 }
               }
+
             });
           },
           logout: (result: LogoutMutation, args, cache, info) => {
