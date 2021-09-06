@@ -1,6 +1,6 @@
 import { dedupExchange, fetchExchange, stringifyVariables} from 'urql';
 import { cacheExchange, Resolver } from '@urql/exchange-graphcache';
-import { CreatePostMutation, LoginMutation, LogoutMutation, MeDocument, MeQuery, PostsDocument, PostsQuery, RegisterMutation } from '../generated/graphql';
+import { CreatePostMutation, LoginMutation, LogoutMutation, MeDocument, MeQuery, PostsDocument, PostsQuery, RegisterMutation, VoteMutation } from '../generated/graphql';
 import { stringify } from 'querystring';
 
 export const createUrqlClient = (ssrExchange: any) => ({
@@ -22,6 +22,13 @@ export const createUrqlClient = (ssrExchange: any) => ({
           createPost: (_result, args, cache, info) => {
             //here we invalidate the cache after creating a post, and fetch all posts again + populate the cache
             // pluse we invalidated also the paginated items, so all items are fetched freshly from the network
+            const allFields = cache.inspectFields('Query');
+            const fieldInfos = allFields.filter(info => info.fieldName === "posts");
+            fieldInfos.forEach((fi) => {
+              cache.invalidate('Query', 'posts', fi.arguments || {});
+            });
+          },
+          vote: (result: VoteMutation, args, cache, info) => {
             const allFields = cache.inspectFields('Query');
             const fieldInfos = allFields.filter(info => info.fieldName === "posts");
             fieldInfos.forEach((fi) => {
