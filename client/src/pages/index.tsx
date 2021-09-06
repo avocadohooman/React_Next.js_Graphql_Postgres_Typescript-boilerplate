@@ -11,6 +11,8 @@ import {
   Flex
 } from "@chakra-ui/react";
 import React, { useState } from 'react';
+import { ChevronDownIcon, ChevronUpIcon } from '@chakra-ui/icons';
+import UpdootSection from '../components/UpdootSection';
 const Index = () => {
 
   const [variables, setVairables] = useState({
@@ -38,13 +40,16 @@ const Index = () => {
       <Stack spacing={8}>
         {result.fetching && !result.data ? (<div>loading</div>) : (
           result.data!.posts.posts.map(post => 
-            <Box p={5} key={post.id} shadow="md" borderWidth="1px">
+            <Flex p={5} key={post.id} shadow="md" borderWidth="1px" alignItems="center">
+              <UpdootSection post={post}/>
               <Flex flexDirection="column">
-                <Heading fontSize="xl">{post.title}</Heading>
-                <Text>posted by {post.author.username}</Text>
+                <Flex flexDirection="column">
+                  <Heading fontSize="xl">{post.title}</Heading>
+                  <Text>posted by {post.author.username}</Text>
+                </Flex>
+                <Text mt={4}>{post.textSnippet}</Text>
               </Flex>
-              <Text mt={4}>{post.textSnippet}</Text>
-            </Box>
+            </Flex>
           )
         )} 
       </Stack>

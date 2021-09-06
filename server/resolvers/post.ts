@@ -43,19 +43,42 @@ export class PostResolver {
         const realValue = isUpdoot ? 1 : -1
         const { userId } = req.session;
 
-        // using START TRANSACTION + COMMIT, allows a joint sequel. This ensures that if one of those fail, all fail
-        await getConnection().query(`
-            START TRANSACTION;
+        const updoot = await Updoot.findOne({ where: {postId, userId}});
 
-            INERT INTO updoot ("userId", "postId", value)
-            values(${userId}, ${postId}, ${realValue});
+        // the user has voted on the post alreadt and wants to change the vote
+        if (updoot && updoot.value !== realValue) {
+            await getConnection().transaction(async tm => {
+                await tm.query(`
+                    UPDATE updoot
+                    SET value = $1
+                    WHERE "postId" = $2 AND "userId" = $3
+                `, [realValue, postId, userId]);
 
-            UPDATE post
-            SET points = points + ${realValue}
-            WHERE id = ${postId};
+                await tm.query(`
+                    UPDATE post
+                    SET points = points + $1
+                    WHERE id = $2;
+                `, [2 * realValue, postId]);
+            })
+        } else if (!updoot) {
+            // has never voted before
 
-            COMMIT;
-        `);
+            // using transaction, allows a joint sequel. This ensures that if one of those fail, all fail
+            // .transcation deals with opening and closing a transaction (not need to define START TRANSACTION and COMMIT)
+            await getConnection().transaction(async tm => {
+                await tm.query(`
+                    INSERT INTO updoot ("userId", "postId", value)
+                    values ($1, $2, $3);
+                `, [userId, postId, realValue]);
+
+                await tm.query(`
+                    UPDATE post
+                    SET points = points + $1
+                    WHERE id = $2;
+                `, [realValue, postId]);
+            })
+        }
+
 
         return true;
     }
