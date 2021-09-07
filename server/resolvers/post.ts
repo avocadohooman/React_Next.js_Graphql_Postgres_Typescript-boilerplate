@@ -95,7 +95,6 @@ export class PostResolver {
         const realLimitPlusOne = realLimit + 1;
 
         const replacements: any[] = [realLimitPlusOne];
-        console.log("REG", req.session);
         if (req.session.userId) {
             replacements.push(req.session.userId);
         }
@@ -129,7 +128,6 @@ export class PostResolver {
     @Query(() => Post, {nullable: true})
     post(
         @Arg('id', () => Int) id: number,
-        
         ) : Promise<Post | undefined> {
         return Post.findOne(id)
     }

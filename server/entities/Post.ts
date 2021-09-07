@@ -28,7 +28,7 @@ export class Post extends BaseEntity {
     creatorId: number;
 
     @Field()
-    @ManyToOne(() => User, user => user.posts)
+    @ManyToOne(() => User, (user) => user.posts)
     author: User;
 
     @OneToMany(() => Updoot, (updoot) => updoot.post)

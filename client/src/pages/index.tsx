@@ -44,7 +44,11 @@ const Index = () => {
               <UpdootSection post={post}/>
               <Flex flexDirection="column">
                 <Flex flexDirection="column">
-                  <Heading fontSize="xl">{post.title}</Heading>
+                  <NextLink href="/post/[id]" as={`/post/${post.id}`}>
+                    <Link href="/post">
+                        <Heading fontSize="xl">{post.title}</Heading>
+                    </Link>
+                  </NextLink>
                   <Text>posted by {post.author.username}</Text>
                 </Flex>
                 <Text mt={4}>{post.textSnippet}</Text>

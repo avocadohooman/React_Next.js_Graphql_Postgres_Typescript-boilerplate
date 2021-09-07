@@ -6,9 +6,5 @@ query Post($id: Int!) {
         text
         points
         voteStatus
-        author {
-            id
-            username 
-        }
     }
 }
