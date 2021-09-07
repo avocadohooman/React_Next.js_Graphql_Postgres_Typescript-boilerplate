@@ -1,6 +1,6 @@
 import { withUrqlClient } from 'next-urql';
 import { createUrqlClient } from "../utils/createUrqlClient";
-import { usePostsQuery } from "../generated/graphql";
+import { useDeletePostMutation, useMeQuery, usePostsQuery } from "../generated/graphql";
 import Layout from "../components/Layout";
 import NextLink from "next/link";
 import {
@@ -8,10 +8,11 @@ import {
   Button, Stack, Box,
   Heading,
   Text,
-  Flex
+  Flex,
+  IconButton
 } from "@chakra-ui/react";
 import React, { useState } from 'react';
-import { ChevronDownIcon, ChevronUpIcon } from '@chakra-ui/icons';
+import { ChevronDownIcon, ChevronUpIcon, DeleteIcon } from '@chakra-ui/icons';
 import UpdootSection from '../components/UpdootSection';
 const Index = () => {
 
@@ -19,7 +20,9 @@ const Index = () => {
     limit: 15, 
     cursor: null as null | string | undefined
   });
+  const [whoIs, me] = useMeQuery();
   const [result, post] = usePostsQuery({variables});
+  const [deleteResult, deletePost] = useDeletePostMutation();
 
   if (!result.fetching && !result.data) {
     return <div> No posts available.</div>
@@ -38,23 +41,34 @@ const Index = () => {
       </Flex>
       <Stack spacing={8}>
         {result.fetching && !result.data ? (<div>loading</div>) : (
-          result.data!.posts.posts.map(post => 
+          result.data!.posts.posts.map(post => !post ? null : (
+
             <Flex p={5} key={post.id} shadow="md" borderWidth="1px" alignItems="center">
               <UpdootSection post={post}/>
-              <Flex flexDirection="column">
+              <Box flex={1}>
                 <Flex flexDirection="column">
-                  <NextLink href="/post/[id]" as={`/post/${post.id}`}>
-                    <Link href="/post">
-                        <Heading fontSize="xl">{post.title}</Heading>
-                    </Link>
-                  </NextLink>
-                  <Text>posted by {post.author.username}</Text>
+                  <Flex flexDirection="column">
+                    <NextLink href="/post/[id]" as={`/post/${post.id}`}>
+                      <Link href="/post">
+                          <Heading fontSize="xl">{post.title}</Heading>
+                      </Link>
+                    </NextLink>
+                    <Text>posted by {post.author.username}</Text>
+                  </Flex>
+                  <Flex>
+                    <Text flex={1} mt={4}>{post.textSnippet}</Text>
+                    { whoIs.data?.me?.id === post.author.id && 
+                        <IconButton ml={'autp'} icon={<DeleteIcon />} aria-label='Delete Post' onClick={() => 
+                          deletePost({ id: post.id })
+                        }>
+                        </IconButton>
+                      }
+                  </Flex>
                 </Flex>
-                <Text mt={4}>{post.textSnippet}</Text>
-              </Flex>
+              </Box>
             </Flex>
           )
-        )} 
+        ))}  
       </Stack>
       {result.data && result.data.posts.hasMore ? (
               <Flex justifyContent='center' mt={4} mb={10}>
