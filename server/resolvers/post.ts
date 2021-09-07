@@ -146,18 +146,20 @@ export class PostResolver {
     @Mutation(() => Post, {nullable: true})
     @UseMiddleware(isAuth)
     async updatePost(
-        @Arg('id') id: number,
+        @Arg('id', () => Int) id: number,
         //when wanting to make an argument optional, set it as nullable: true
         @Arg('title', () => String, {nullable: true}) title: string,
-        
+        @Arg('text', () => String, {nullable: true}) text: string,
+        @Ctx() {req}: MyContext
         ) : Promise<Post | undefined> {
         const post = await Post.findOne(id);
         if (!post) {
             return undefined;
         }
-        if (typeof title !== undefined) {
+        if (typeof title !== undefined && typeof text !== undefined) {
             post.title = title;
-            await Post.update({id}, {title});
+            post.text = text;
+            await Post.update({id, creatorId: req.session.userId}, {title, text});
         }
         return post;
     }
