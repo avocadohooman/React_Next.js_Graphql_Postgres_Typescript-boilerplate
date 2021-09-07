@@ -52,7 +52,7 @@ const NavBar: React.FC<NavBarProps> = ({}) => {
     }
 
     return (
-        <Flex position='sticky' zIndex={1} top={0}bg='tan' p={4}>
+        <Flex position='sticky' zIndex={1} top={0}bg='tan' p={4} align="center">
             <Link href="/">
                 <Heading fontSize={18}> 
                     LiReddit

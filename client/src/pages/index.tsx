@@ -28,7 +28,6 @@ const Index = () => {
   return (
     <Layout>
       <Flex justifyContent='space-between' mb={4}>
-        <Heading>LiReddit</Heading>
         <NextLink href='createPost'>
           <Link>
             <Button>
