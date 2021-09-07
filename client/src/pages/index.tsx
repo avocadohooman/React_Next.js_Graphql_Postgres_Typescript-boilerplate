@@ -12,7 +12,7 @@ import {
   IconButton
 } from "@chakra-ui/react";
 import React, { useState } from 'react';
-import { ChevronDownIcon, ChevronUpIcon, DeleteIcon } from '@chakra-ui/icons';
+import { ChevronDownIcon, ChevronUpIcon, DeleteIcon, EditIcon } from '@chakra-ui/icons';
 import UpdootSection from '../components/UpdootSection';
 const Index = () => {
 
@@ -59,11 +59,19 @@ const Index = () => {
                   </Flex>
                   <Flex>
                     <Text flex={1} mt={4}>{post.textSnippet}</Text>
-                    { whoIs.data?.me?.id === post.author.id && 
+                    { whoIs.data?.me?.id === post.author.id 
+                      && 
+                      <Box>
+                        <NextLink href="/post/edit/[id]" as={`/post/edit/${post.id}`}>
+                          <Link href="/post/edit">
+                            <IconButton mr={2} ml={'autp'} icon={<EditIcon />} aria-label='Edit Post'></IconButton>
+                          </Link>
+                        </NextLink>
                         <IconButton ml={'autp'} icon={<DeleteIcon />} aria-label='Delete Post' onClick={() => 
                           deletePost({ id: post.id })
                         }>
                         </IconButton>
+                      </Box>
                       }
                   </Flex>
                 </Flex>

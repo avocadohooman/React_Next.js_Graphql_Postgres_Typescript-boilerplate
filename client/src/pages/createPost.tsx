@@ -22,12 +22,6 @@ const CreatePost: React.FC<{}> = ({}) => {
             <Formik 
             initialValues={{title: '', text: '', points: 0}}
             onSubmit={ async (values, {setErrors}) => {
-                // const response = await login(values);
-                // if (response.data?.login.errors) {
-                //     setErrors(toErrorMap(response.data.login.errors));
-                // } else if (response.data?.login.user) {
-                //     router.push('/');
-                // }   
                 const {error} = await createPost({input: values})
                 if (error?.message.includes('not')) {
                     router.replace('/login'); // resets route, instead of adding a new instance to router history
