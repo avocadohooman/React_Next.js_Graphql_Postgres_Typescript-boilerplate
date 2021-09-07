@@ -164,13 +164,15 @@ export class PostResolver {
     @Mutation(() => Boolean)
     @UseMiddleware(isAuth)
     async deletePost(
-        @Arg('id') id: number,
+        @Arg('id', () => Int) id: number,
         @Ctx() { req } : MyContext
         ) : Promise<boolean> {
         try {
             // find post by id and check if creatorId matches current user
+            // await Updoot.delete({"postId": id});
             await Post.delete({id, creatorId: req.session.userId});
         } catch (error) {
+            console.log(error);
             return false
         }
         return true;

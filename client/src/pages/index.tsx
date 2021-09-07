@@ -41,8 +41,10 @@ const Index = () => {
       </Flex>
       <Stack spacing={8}>
         {result.fetching && !result.data ? (<div>loading</div>) : (
-          result.data!.posts.posts.map(post => !post ? null : (
-
+          result.data!.posts.posts.map(post => 
+            // this null check is important as we invalidate the cache, which sets delete items in the cache to null
+            // hence, we need to return null otherwise we an error
+            !post ? null : (
             <Flex p={5} key={post.id} shadow="md" borderWidth="1px" alignItems="center">
               <UpdootSection post={post}/>
               <Box flex={1}>
