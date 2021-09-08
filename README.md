@@ -1,2 +1,4 @@
-# React_Next.js_Graphql_Postgres_Typescript-boilerplate
-A full-stack project that serves a boilerplate for react, graphql, postgres and typescript. 
+# React-Next.js-GraphQL-Postgres-Typescript Fullstack Project
+In this fullstack project, I used various latest technologies to serve as boilerplate for future projects. 
+
+
