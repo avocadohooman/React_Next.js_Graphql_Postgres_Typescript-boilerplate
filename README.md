@@ -32,5 +32,5 @@ yarn run dev:ts-node
 
 ## App Preview
 ### Landing Page 
-![landing](./readme_assets/lireddit_prev2.gif?raw=true)
+![landing](./readme_assets/lireddit_prev_gif.gif?raw=true)
 
