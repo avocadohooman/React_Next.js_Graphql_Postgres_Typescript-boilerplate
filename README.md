@@ -5,7 +5,7 @@ My main focus was to take a deep dive into GraphQL and get familiar with server-
 
 It is a fake reddit platform, in which you can create, edit and delete posts. You can up-/down vote posts from other users and your own. Additionally, you can create an account and login. 
 
-It uses extensive caching thanks to GraphQL and also pagination.
+It uses extensive caching and pagination thanks to Apollo GraphQL.
 
 ## Tech Stack
 - React
