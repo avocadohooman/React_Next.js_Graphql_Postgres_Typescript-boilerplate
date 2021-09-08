@@ -7,7 +7,6 @@ import InputField from '../../../components/InputField';
 import Layout from '../../../components/Layout';
 import { usePostQuery, useUpdatePostMutation } from '../../../generated/graphql';
 import { createUrqlClient } from '../../../utils/createUrqlClient';
-import createPost from '../../createPost';
 
 
 const EditPost = ({}) => {
@@ -51,7 +50,7 @@ const EditPost = ({}) => {
                 router.replace('/login'); // resets route, instead of adding a new instance to router history
             }
             if (!error) {
-                router.push('/');
+                router.back();
             }
         }}
         > 

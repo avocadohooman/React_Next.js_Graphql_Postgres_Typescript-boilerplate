@@ -1,9 +1,18 @@
-import { dedupExchange, fetchExchange, stringifyVariables} from 'urql';
-import { cacheExchange, Resolver } from '@urql/exchange-graphcache';
+import { dedupExchange, fetchExchange, stringifyVariables } from 'urql';
+import { cacheExchange, Resolver, Cache } from '@urql/exchange-graphcache';
 import { CreatePostMutation, DeletePostMutationVariables, LoginMutation, LogoutMutation, MeDocument, MeQuery, PostsDocument, PostsQuery, RegisterMutation, VoteMutation, VoteMutationVariables } from '../generated/graphql';
 import { stringify } from 'querystring';
 import { gql } from '@urql/core';
 import { isServer } from './isServer';
+
+
+const invalidateAllPosts = (cache: Cache) => {
+  const allFields = cache.inspectFields('Query');
+  const fieldInfos = allFields.filter(info => info.fieldName === "posts");
+  fieldInfos.forEach((fi) => {
+    cache.invalidate('Query', 'posts', fi.arguments || {});
+  });
+}
 
 export const createUrqlClient = (ssrExchange: any, ctx: any) => {
   let cookie = '';
@@ -34,11 +43,7 @@ export const createUrqlClient = (ssrExchange: any, ctx: any) => {
           createPost: (_result, args, cache, info) => {
             //here we invalidate the cache after creating a post, and fetch all posts again + populate the cache
             // pluse we invalidated also the paginated items, so all items are fetched freshly from the network
-            const allFields = cache.inspectFields('Query');
-            const fieldInfos = allFields.filter(info => info.fieldName === "posts");
-            fieldInfos.forEach((fi) => {
-              cache.invalidate('Query', 'posts', fi.arguments || {});
-            });
+            invalidateAllPosts(cache);
           },
           deletePost: (_result, args, cache, info) => {
             cache.invalidate({__typename: 'Post', id: (args as DeletePostMutationVariables).id});
@@ -80,7 +85,6 @@ export const createUrqlClient = (ssrExchange: any, ctx: any) => {
                   me: result.login.user,
                 }
               }
-
             });
           },
           logout: (result: LogoutMutation, args, cache, info) => {
