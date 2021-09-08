@@ -23,14 +23,14 @@ const initialValues = {
 
 const Register: React.FC<registerProps> = ({}) => {
         const router = useRouter();
-        const [result, register] = useRegisterMutation();
+        const [register] = useRegisterMutation();
 
         return (
             <Wrapper variant='small'>
                 <Formik 
                 initialValues={{username: '', password: '', email: ''}}
                 onSubmit={ async (values, {setErrors}) => {
-                    const response = await register(values);
+                    const response = await register({variables: values});
                     if (response.data?.register.errors) {
                         setErrors(toErrorMap(response.data.register.errors));
                     } else if (response.data?.register.user) {
@@ -40,10 +40,10 @@ const Register: React.FC<registerProps> = ({}) => {
                 > 
                 {({isSubmitting}) => (
                     <Form>
-                        <InputField name='username' placeholder='Username' label='Username'/>
-                        <InputField name='email' placeholder='Email' label='Email'/>
+                        <InputField name='username' placeholder='Username' label='Username' textarea={false}/>
+                        <InputField name='email' placeholder='Email' label='Email' textarea={false}/>
                         <Box mt={4}>
-                            <InputField name='password' placeholder='Password' label='Password' type='password'/>
+                            <InputField name='password' placeholder='Password' label='Password' type='password' textarea={false}/>
                         </Box>
                         <Button type='submit' isLoading={isSubmitting} mt={4}>Register</Button>
                     </Form>

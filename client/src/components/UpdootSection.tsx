@@ -9,7 +9,7 @@ interface UpdootSectionProps {
 
 const UpdootSection: React.FC<UpdootSectionProps> = ({post}) => {
     const [loadingState, setLoadingState] = useState<'updoot-isloading' | 'downdoot-isloading' | 'not-loading'>('not-loading');
-    const [result, vote] = useVoteMutation();
+    const [vote] = useVoteMutation();
 
     return (
         <Flex flexDirection="column" mr={4} alignItems="center">  
@@ -21,7 +21,7 @@ const UpdootSection: React.FC<UpdootSectionProps> = ({post}) => {
                     return;
                   }
                 setLoadingState('updoot-isloading');
-                await vote({value: 1, postId: post.id});
+                await vote({ variables: {value: 1, postId: post.id}});
                 setLoadingState('not-loading');
             }} w={8} h={8}/>
                 {post.points}
@@ -33,7 +33,7 @@ const UpdootSection: React.FC<UpdootSectionProps> = ({post}) => {
                     return;
                   }
                 setLoadingState('downdoot-isloading');
-                await vote({value: -1, postId: post.id});
+                await vote({variables: {value: -1, postId: post.id}});
                 setLoadingState('not-loading');
             }} w={8} h={8}/>
         </Flex>

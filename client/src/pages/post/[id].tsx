@@ -9,25 +9,25 @@ import { Heading } from '@chakra-ui/layout';
 const Post = ({}) => {
     const router = useRouter();
     const intId = typeof router.query.id === 'string' ? parseInt(router.query.id) : -1
-    const [result, getPost] = usePostQuery({
-        pause: intId === -1,
+    const postQuery = usePostQuery({
+        skip: intId === -1,
         variables: {
             id: intId
         }
     });
-    if (result.fetching) {
+    if (postQuery.loading) {
         return (
             <Layout> 
                 <div>loading...</div>
             </Layout>
         )
     }
-    if (result.error) {
+    if (postQuery.error) {
         <Layout>
-            <div>{result.error.message}</div>
+            <div>{postQuery.error.message}</div>
         </Layout>
     }
-    if (!result.data?.post) {
+    if (!postQuery.data?.post) {
         return (
             <Layout>
                 <div>Could not find post</div>
@@ -36,8 +36,8 @@ const Post = ({}) => {
     }
     return (
         <Layout> 
-            <Heading mb={4}>{result.data?.post?.title}</Heading>
-            {result.data?.post?.text}
+            <Heading mb={4}>{postQuery.data?.post?.title}</Heading>
+            {postQuery.data?.post?.text}
         </Layout>
     );
 };

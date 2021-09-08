@@ -13,7 +13,7 @@ import { useIsAuth } from '../utils/useIsAuth';
 
 
 const CreatePost: React.FC<{}> = ({}) => {
-    const [result, createPost] = useCreatePostMutation();
+    const [createPost] = useCreatePostMutation();
     const router = useRouter();
     useIsAuth();
 
@@ -22,11 +22,8 @@ const CreatePost: React.FC<{}> = ({}) => {
             <Formik 
             initialValues={{title: '', text: '', points: 0}}
             onSubmit={ async (values, {setErrors}) => {
-                const {error} = await createPost({input: values})
-                if (error?.message.includes('not')) {
-                    router.replace('/login'); // resets route, instead of adding a new instance to router history
-                }
-                if (!error) {
+                const {errors} = await createPost({variables: {input: values}} )
+                if (!errors) {
                     router.push('/');
                 }
             }}

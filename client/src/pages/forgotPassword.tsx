@@ -9,7 +9,7 @@ import { withUrqlClient } from 'next-urql';
 import { createUrqlClient } from "../utils/createUrqlClient";
 
 const ForgotPassword: React.FC<{}> = ({}) => {
-        const [result, forgotPassword] = useForgotPasswordMutation();
+        const [forgotPassword] = useForgotPasswordMutation();
         const [complete, setComplete] = useState(false);
         const router = useRouter();
 
@@ -18,7 +18,7 @@ const ForgotPassword: React.FC<{}> = ({}) => {
             <Formik 
             initialValues={{email: ''}}
             onSubmit={ async (values) => {
-                await forgotPassword(values);  
+                await forgotPassword({variables: values});  
                 setComplete(true);
                 setTimeout(() => {
                     router.push('/');
@@ -31,7 +31,7 @@ const ForgotPassword: React.FC<{}> = ({}) => {
                 </Box>
                 ) :(
                 <Form>
-                    <InputField name='email' placeholder='Email' label='Enter your Email'/>
+                    <InputField name='email' placeholder='Email' label='Enter your Email' textarea={false}/>
                     <Button type='submit' isLoading={isSubmitting} mt={4}>Forgot Password</Button>
                 </Form>
 

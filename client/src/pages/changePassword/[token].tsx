@@ -19,7 +19,7 @@ import NextLink from "next/link";
 
 export const ChangePassword: NextPage = () => {
         const router = useRouter();
-        const [result, changePassword] = useChangePasswordMutation();
+        const [ changePassword] = useChangePasswordMutation();
         const [tokenError, setTokenError] = useState("");
 
         return (
@@ -27,8 +27,8 @@ export const ChangePassword: NextPage = () => {
             <Formik 
             initialValues={{password: '',}}
             onSubmit={ async (values, {setErrors}) => {
-                const response = await changePassword({password: values.password, 
-                    token: typeof router.query.token === 'string' ? router.query.token : ''});
+                const response = await changePassword({variables: {password: values.password, 
+                    token: typeof router.query.token === 'string' ? router.query.token : ''}});
                 if (response.data?.changePassword.errors) {
                     const errorMap = toErrorMap(response.data?.changePassword.errors);
                     if ('token' in errorMap) {

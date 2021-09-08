@@ -12,27 +12,27 @@ import { createUrqlClient } from '../../../utils/createUrqlClient';
 const EditPost = ({}) => {
     const router = useRouter();
     const intId = typeof router.query.id === 'string' ? parseInt(router.query.id) : -1
-    const [result, getPost] = usePostQuery({
-        pause: intId === -1,
+    const postQuery = usePostQuery({
+        skip: intId === -1,
         variables: {
             id: intId
         }
     });
-    const [updateResult, updatePost] = useUpdatePostMutation();
+    const [updatePost] = useUpdatePostMutation();
 
-    if (result.fetching) {
+    if (postQuery.loading) {
         return (
             <Layout> 
                 <div>loading...</div>
             </Layout>
         )
     }
-    if (result.error) {
+    if (postQuery.error) {
         <Layout>
-            <div>{result.error.message}</div>
+            <div>{postQuery.error.message}</div>
         </Layout>
     }
-    if (!result.data?.post) {
+    if (!postQuery.data?.post) {
         return (
             <Layout>
                 <div>Could not find post</div>
@@ -43,22 +43,19 @@ const EditPost = ({}) => {
     return (
     <Layout variant='small'>
         <Formik 
-        initialValues={{title: result.data?.post?.title, text: result.data?.post?.text, points: 0}}
+        initialValues={{title: postQuery.data?.post?.title, text: postQuery.data?.post?.text, points: 0}}
         onSubmit={ async (values, {setErrors}) => {
-            const {error} = await updatePost({id: intId, text: values.text, title: values.title})
-            if (error?.message.includes('not')) {
-                router.replace('/login'); // resets route, instead of adding a new instance to router history
-            }
-            if (!error) {
+            const {errors} = await updatePost({variables: {id: intId, text: values.text, title: values.title}})
+            if (!errors) {
                 router.back();
             }
         }}
         > 
         {({isSubmitting}) => (
             <Form>
-                <InputField textarea={false} name='title' placeholder={`${result.data?.post?.title}`} label='Title'/>
+                <InputField textarea={false} name='title' placeholder={`${postQuery.data?.post?.title}`} label='Title'/>
                 <Box mt={4}>
-                    <InputField textarea={true} name='text' placeholder={`${result.data?.post?.text}`} label='Text'/>
+                    <InputField textarea={true} name='text' placeholder={`${postQuery.data?.post?.text}`} label='Text'/>
                 </Box>
                 <Button type='submit' isLoading={isSubmitting} mt={4}>Edit Post</Button>
             </Form>
