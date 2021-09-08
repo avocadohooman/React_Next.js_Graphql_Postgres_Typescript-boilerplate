@@ -25,7 +25,7 @@ It is a fake reddit platform, in which you can create, edit and delete posts. Yo
 git clone https://github.com/avocadohooman/React_Next.js_Graphql_Postgres_Typescript-boilerplate.git
 cd React_Next.js_Graphql_Postgres_Typescript-boilerplate.git
 cd client 
-yarn run dev:
+yarn run dev
 cd ../server
 yarn run dev:ts-node
 ```
