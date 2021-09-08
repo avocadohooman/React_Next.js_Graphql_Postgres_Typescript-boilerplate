@@ -7,6 +7,7 @@ import { Formik, Form } from 'formik';
 import { useForgotPasswordMutation } from '../generated/graphql';
 import { withUrqlClient } from 'next-urql';
 import { createUrqlClient } from "../utils/createUrqlClient";
+import { withApollo } from '../utils/withApollo';
 
 const ForgotPassword: React.FC<{}> = ({}) => {
         const [forgotPassword] = useForgotPasswordMutation();
@@ -41,4 +42,4 @@ const ForgotPassword: React.FC<{}> = ({}) => {
         );
 };
 
-export default ForgotPassword;
+export default withApollo({ssr: false})(ForgotPassword);

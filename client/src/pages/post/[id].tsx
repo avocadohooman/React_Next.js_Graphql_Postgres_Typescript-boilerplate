@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import { usePostQuery } from '../../generated/graphql';
 import Layout from '../../components/Layout';
 import { Heading } from '@chakra-ui/layout';
+import { withApollo } from '../../utils/withApollo';
 
 
 const Post = ({}) => {
@@ -42,4 +43,4 @@ const Post = ({}) => {
     );
 };
 
-export default withUrqlClient(createUrqlClient, {ssr: true})(Post);
+export default withApollo({ssr: true})(Post);

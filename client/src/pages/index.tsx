@@ -1,6 +1,6 @@
 import { withUrqlClient } from 'next-urql';
 import { createUrqlClient } from "../utils/createUrqlClient";
-import { useDeletePostMutation, useMeQuery, usePostsQuery } from "../generated/graphql";
+import { PostQuery, PostsQuery, useDeletePostMutation, useMeQuery, usePostsQuery } from "../generated/graphql";
 import Layout from "../components/Layout";
 import NextLink from "next/link";
 import {
@@ -14,14 +14,16 @@ import {
 import React, { useState } from 'react';
 import { ChevronDownIcon, ChevronUpIcon, DeleteIcon, EditIcon } from '@chakra-ui/icons';
 import UpdootSection from '../components/UpdootSection';
+import { withApollo } from '../utils/withApollo';
 const Index = () => {
 
-  const [variables, setVairables] = useState({
-    limit: 15, 
-    cursor: null as null | string | undefined
-  });
+
   const meQuery = useMeQuery();
-  const postQuery = usePostsQuery({variables});
+  const postQuery = usePostsQuery({variables: {
+    limit: 15, 
+    cursor: null
+  }});
+
   const [deletePost] = useDeletePostMutation();
 
   if (!postQuery.loading && !postQuery.data) {
@@ -82,10 +84,12 @@ const Index = () => {
       {postQuery.data && postQuery.data.posts.hasMore ? (
               <Flex justifyContent='center' mt={4} mb={10}>
               <Button onClick={() => {
-                setVairables({
-                  limit: variables.limit , 
-                  cursor: postQuery.data?.posts.posts[postQuery.data?.posts.posts.length - 1].createdAt
-                })
+                postQuery.fetchMore({
+                  variables: {
+                    limit: postQuery.variables?.limit , 
+                    cursor: postQuery.data?.posts.posts[postQuery.data?.posts.posts.length - 1].createdAt
+                  },
+                });
               }}isLoading={postQuery.loading}>
                   Load More
               </Button>
@@ -95,4 +99,4 @@ const Index = () => {
   )
 }
 
-export default Index;
+export default withApollo({ssr: true})(Index);
