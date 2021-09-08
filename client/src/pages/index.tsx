@@ -20,14 +20,13 @@ const Index = () => {
     limit: 15, 
     cursor: null as null | string | undefined
   });
-  const [whoIs, me] = useMeQuery();
-  const [result, post] = usePostsQuery({variables});
-  const [deleteResult, deletePost] = useDeletePostMutation();
+  const meQuery = useMeQuery();
+  const postQuery = usePostsQuery({variables});
+  const [deletePost] = useDeletePostMutation();
 
-  if (!result.fetching && !result.data) {
+  if (!postQuery.loading && !postQuery.data) {
     return <div> No posts available.</div>
   }
-
   return (
     <Layout>
       <Flex justifyContent='space-between' mb={4}>
@@ -40,8 +39,8 @@ const Index = () => {
         </NextLink>
       </Flex>
       <Stack spacing={8}>
-        {result.fetching && !result.data ? (<div>loading</div>) : (
-          result.data!.posts.posts.map(post => 
+        {postQuery.loading && !postQuery.data ? (<div>loading</div>) : (
+          postQuery.data!.posts.posts.map(post => 
             // this null check is important as we invalidate the cache, which sets delete items in the cache to null
             // hence, we need to return null otherwise we an error
             !post ? null : (
@@ -59,7 +58,7 @@ const Index = () => {
                   </Flex>
                   <Flex>
                     <Text flex={1} mt={4}>{post.textSnippet}</Text>
-                    { whoIs.data?.me?.id === post.author.id 
+                    { meQuery.data?.me?.id === post.author.id 
                       && 
                       <Box>
                         <NextLink href="/post/edit/[id]" as={`/post/edit/${post.id}`}>
@@ -68,7 +67,7 @@ const Index = () => {
                           </Link>
                         </NextLink>
                         <IconButton ml={'autp'} icon={<DeleteIcon />} aria-label='Delete Post' onClick={() => 
-                          deletePost({ id: post.id })
+                          deletePost( { variables:{ id: post.id }} )
                         }>
                         </IconButton>
                       </Box>
@@ -80,14 +79,14 @@ const Index = () => {
           )
         ))}  
       </Stack>
-      {result.data && result.data.posts.hasMore ? (
+      {postQuery.data && postQuery.data.posts.hasMore ? (
               <Flex justifyContent='center' mt={4} mb={10}>
               <Button onClick={() => {
                 setVairables({
                   limit: variables.limit , 
-                  cursor: result.data?.posts.posts[result.data?.posts.posts.length - 1].createdAt
+                  cursor: postQuery.data?.posts.posts[postQuery.data?.posts.posts.length - 1].createdAt
                 })
-              }}isLoading={result.fetching}>
+              }}isLoading={postQuery.loading}>
                   Load More
               </Button>
             </Flex>
@@ -96,4 +95,4 @@ const Index = () => {
   )
 }
 
-export default withUrqlClient(createUrqlClient, {ssr: true})(Index);
+export default Index;

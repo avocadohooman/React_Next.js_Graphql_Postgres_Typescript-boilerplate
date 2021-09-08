@@ -26,7 +26,7 @@ const main = async () => {
         username: 'postgres',
         password: 'postgres',
         logging: true,
-        synchronize: true,
+        synchronize:  true, // set to false in prod
         migrations: [path.join(__dirname, "./migrations/*")],
         entities: [User, Post, Updoot],
     });

@@ -11,18 +11,18 @@ interface NavBarProps {
 }
 
 const NavBar: React.FC<NavBarProps> = ({}) => {
-    const [result, me] = useMeQuery({
-        pause: isServer()
+    const meQuery = useMeQuery({
+        skip: isServer()
     });
-    const [, logout] = useLogoutMutation();
+    const [logout, {loading: logoutFetching}] = useLogoutMutation();
     let body = null;
     const router = useRouter();
 
     //data is loading
-    if (result.fetching) {
+    if (meQuery.loading) {
 
         //user not logged in
-    } else if (!result.data?.me) {
+    } else if (!meQuery.data?.me) {
         body = (
             <>
                 <NextLink href='/login'>
@@ -39,7 +39,7 @@ const NavBar: React.FC<NavBarProps> = ({}) => {
             <>
                 <Flex>
                     <Box>
-                        {result.data.me.username}
+                        {meQuery.data.me.username}
                     </Box>
                     <Button onClick={async () => {
                         await logout();
