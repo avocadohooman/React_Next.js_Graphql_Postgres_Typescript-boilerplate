@@ -5,8 +5,6 @@ import InputField from '../components/InputField';
 import Wrapper from '../components/Wrapper';
 import { Formik, Form } from 'formik';
 import { useForgotPasswordMutation } from '../generated/graphql';
-import { withUrqlClient } from 'next-urql';
-import { createUrqlClient } from "../utils/createUrqlClient";
 import { withApollo } from '../utils/withApollo';
 
 const ForgotPassword: React.FC<{}> = ({}) => {
@@ -14,7 +12,7 @@ const ForgotPassword: React.FC<{}> = ({}) => {
         const [complete, setComplete] = useState(false);
         const router = useRouter();
 
-        return (
+        return ( 
             <Wrapper variant='small'>
             <Formik 
             initialValues={{email: ''}}

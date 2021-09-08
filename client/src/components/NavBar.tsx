@@ -20,6 +20,7 @@ const NavBar: React.FC<NavBarProps> = ({}) => {
     const router = useRouter();
     const apollo = useApolloClient();
 
+    console.log('meQuery.data', meQuery.data);
     //data is loading
     if (meQuery.loading) {
 

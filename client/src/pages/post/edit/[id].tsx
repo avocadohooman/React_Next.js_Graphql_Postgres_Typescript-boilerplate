@@ -7,6 +7,7 @@ import InputField from '../../../components/InputField';
 import Layout from '../../../components/Layout';
 import { usePostQuery, useUpdatePostMutation } from '../../../generated/graphql';
 import { createUrqlClient } from '../../../utils/createUrqlClient';
+import { withApollo } from '../../../utils/withApollo';
 
 
 const EditPost = ({}) => {
@@ -66,4 +67,4 @@ const EditPost = ({}) => {
     );
 };
 
-export default withUrqlClient(createUrqlClient)(EditPost);
+export default withApollo({ssr: false})(EditPost);

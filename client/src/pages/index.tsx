@@ -69,7 +69,11 @@ const Index = () => {
                           </Link>
                         </NextLink>
                         <IconButton ml={'autp'} icon={<DeleteIcon />} aria-label='Delete Post' onClick={() => 
-                          deletePost( { variables:{ id: post.id }} )
+                          deletePost( { 
+                            variables:{ id: post.id }, 
+                            update: (cache) => {
+                            cache.evict({id: 'Post' + post.id});
+                          }})
                         }>
                         </IconButton>
                       </Box>

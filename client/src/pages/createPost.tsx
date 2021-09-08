@@ -23,7 +23,12 @@ const CreatePost: React.FC<{}> = ({}) => {
             <Formik 
             initialValues={{title: '', text: '', points: 0}}
             onSubmit={ async (values, {setErrors}) => {
-                const {errors} = await createPost({variables: {input: values}} )
+                const {errors} = await createPost({
+                    variables: {input: values},
+                    update: (cache) => {
+                        cache.evict({fieldName: 'posts'})
+                    }
+                } )
                 if (!errors) {
                     router.push('/');
                 }
