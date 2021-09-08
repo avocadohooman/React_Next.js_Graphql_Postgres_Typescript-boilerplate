@@ -1,5 +1,7 @@
 # React-Next.js-GraphQL-Postgres-Typescript Fullstack Project
-In this fullstack project, I used various latest technologies to serve as boilerplate for future projects. 
+In this fullstack project, I used various latest technologies to serve as boilerplate for future projects.
+
+My main focus was to take a deep dive in GraphQL and get familiar with server-side rendering, using the Next.js framework.
 
 It is a fake reddit platform, in which you can create, edit and delete posts. You can up-/down vote posts from other users and your own. Additionally, you can create an account and login. 
 
