@@ -72,7 +72,8 @@ const Index = () => {
                           deletePost( { 
                             variables:{ id: post.id }, 
                             update: (cache) => {
-                            cache.evict({id: 'Post' + post.id});
+                            console.log('cache', cache);
+                            cache.evict({id: 'Post:' + post.id});
                           }})
                         }>
                         </IconButton>
